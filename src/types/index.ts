@@ -6,8 +6,18 @@ export interface Task {
   order: number;
   tags: string[];
   assignee?: string;
-  dueDate?: Date;
   priority?: 'low' | 'medium' | 'high';
+  dueDate?: Date;
+  createdAt: Date;
+  updatedAt: Date;
+  comments?: Comment[];
+}
+
+export interface Comment {
+  id: string;
+  taskId: string;
+  content: string;
+  author: string;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -25,7 +35,7 @@ export interface Board {
   id: string;
   title: string;
   description?: string;
-  backgroundColor: string;
+  backgroundColor?: string;
   columns: Column[];
   tasks: Task[];
   createdAt: Date;

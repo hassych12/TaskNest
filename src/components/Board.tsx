@@ -1,6 +1,6 @@
 import React from 'react';
 import styled from 'styled-components';
-import type { Board as BoardType, Column, Task } from '../types';
+import type { Board as BoardType, Column, Task, Comment } from '../types';
 import { ColumnComponent } from './Column';
 import { TaskCard } from './TaskCard';
 import { Button } from './ui/Button';
@@ -79,7 +79,7 @@ const DragOverlayContainer = styled.div`
   box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
 `;
 
-export const Board: React.FC<BoardProps> = ({ board }) => {
+export const Board = ({ board }: BoardProps) => {
   const {
     addColumn,
     addTask,
@@ -87,6 +87,11 @@ export const Board: React.FC<BoardProps> = ({ board }) => {
     deleteTask,
     moveTask,
     reorderColumns,
+    updateColumn,
+    deleteColumn,
+    addComment,
+    updateComment,
+    deleteComment,
   } = useBoardStore();
 
   const sensors = useSensors(
@@ -189,6 +194,7 @@ export const Board: React.FC<BoardProps> = ({ board }) => {
       columnId,
       order: board.tasks.filter(t => t.columnId === columnId).length,
       tags: [],
+      comments: [],
       createdAt: new Date(),
       updatedAt: new Date(),
     };
@@ -204,13 +210,31 @@ export const Board: React.FC<BoardProps> = ({ board }) => {
   };
 
   const handleEditColumn = (column: Column) => {
-    // TODO: Open column edit modal
-    console.log('Edit column:', column);
+    updateColumn(board.id, column.id, column);
   };
 
   const handleDeleteColumn = (columnId: string) => {
-    // TODO: Add confirmation dialog
-    console.log('Delete column:', columnId);
+    deleteColumn(board.id, columnId);
+  };
+
+  const handleAddComment = (comment: Comment) => {
+    addComment(board.id, comment.taskId, comment);
+  };
+
+  const handleUpdateComment = (commentId: string, updates: Partial<Comment>) => {
+    // コメントのタスクIDを取得
+    const task = board.tasks.find(t => t.comments?.some(c => c.id === commentId));
+    if (task) {
+      updateComment(board.id, task.id, commentId, updates);
+    }
+  };
+
+  const handleDeleteComment = (commentId: string) => {
+    // コメントのタスクIDを取得
+    const task = board.tasks.find(t => t.comments?.some(c => c.id === commentId));
+    if (task) {
+      deleteComment(board.id, task.id, commentId);
+    }
   };
 
   return (
@@ -285,6 +309,9 @@ export const Board: React.FC<BoardProps> = ({ board }) => {
                   onDeleteTask={handleDeleteTask}
                   onEditColumn={handleEditColumn}
                   onDeleteColumn={handleDeleteColumn}
+                  onAddComment={handleAddComment}
+                  onUpdateComment={handleUpdateComment}
+                  onDeleteComment={handleDeleteComment}
                 />
               ))}
           </SortableContext>
@@ -305,6 +332,9 @@ export const Board: React.FC<BoardProps> = ({ board }) => {
                 task={activeTask}
                 onEdit={() => {}}
                 onDelete={() => {}}
+                onAddComment={() => {}}
+                onUpdateComment={() => {}}
+                onDeleteComment={() => {}}
               />
             </DragOverlayContainer>
           ) : null}

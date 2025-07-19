@@ -1,4 +1,5 @@
 import React, { useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import styled from 'styled-components';
 import { X } from 'lucide-react';
 import { Button } from './Button';
@@ -23,22 +24,33 @@ const ModalOverlay = styled.div`
 const Backdrop = styled.div`
   position: absolute;
   inset: 0;
-  background: rgba(0, 0, 0, 0.6);
-  backdrop-filter: blur(4px);
+  background: hsl(var(--modal-backdrop, var(--background)));
+  backdrop-filter: blur(8px);
+  animation: fadeIn 0.2s ease;
+
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
 `;
 
 const ModalContainer = styled.div`
   position: relative;
   background: hsl(var(--card));
-  border: 1px solid hsl(var(--border));
-  border-radius: 0.5rem;
+  color: hsl(var(--card-foreground));
+  border: 2px solid hsl(var(--border));
+  border-radius: 1rem;
   box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
   width: 100%;
-  max-width: 42rem;
+  max-width: 48rem;
   margin: 0 auto;
   max-height: 90vh;
   overflow-y: auto;
-  animation: fadeIn 0.2s ease, zoomIn 0.2s ease;
+  animation: fadeIn 0.2s ease, slideIn 0.3s ease;
 
   @keyframes fadeIn {
     from {
@@ -49,13 +61,31 @@ const ModalContainer = styled.div`
     }
   }
 
-  @keyframes zoomIn {
+  @keyframes slideIn {
     from {
-      transform: scale(0.95);
+      transform: translateY(-20px) scale(0.95);
     }
     to {
-      transform: scale(1);
+      transform: translateY(0) scale(1);
     }
+  }
+
+  &::-webkit-scrollbar {
+    width: 8px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: rgba(var(--muted), 0.3);
+    border-radius: 4px;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: hsl(var(--primary));
+    border-radius: 4px;
+  }
+
+  &::-webkit-scrollbar-thumb:hover {
+    background: hsl(var(--primary-foreground));
   }
 `;
 
@@ -63,35 +93,43 @@ const ModalHeader = styled.div`
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 1.5rem;
-  border-bottom: 1px solid hsl(var(--border));
-  background: rgba(var(--card), 0.95);
-  backdrop-filter: blur(4px);
+  padding: 1.5rem 2rem;
+  border-bottom: 2px solid hsl(var(--border));
+  background: linear-gradient(135deg, rgba(var(--card), 0.95) 0%, rgba(var(--card), 0.98) 100%);
+  backdrop-filter: blur(12px);
   position: sticky;
   top: 0;
+  border-radius: 1rem 1rem 0 0;
+  z-index: 1;
 `;
 
 const ModalTitle = styled.h2`
-  font-size: 1.25rem;
-  font-weight: 600;
+  font-size: 1.5rem;
+  font-weight: 700;
   color: hsl(var(--card-foreground));
   margin: 0;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 `;
 
 const CloseButton = styled(Button)`
-  height: 2rem;
-  width: 2rem;
+  height: 2.5rem;
+  width: 2.5rem;
+  border-radius: 0.75rem;
+  transition: all 0.2s ease;
   
   &:hover {
-    background: hsl(var(--muted));
+    background: rgba(var(--destructive), 0.1);
+    color: hsl(var(--destructive));
+    transform: scale(1.1);
   }
 `;
 
 const ModalContent = styled.div`
-  padding: 1.5rem;
+  padding: 2rem;
 `;
 
-export const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children }) => {
+export const Modal = ({ isOpen, onClose, title, children }: ModalProps) => {
   useEffect(() => {
     const handleEscape = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
@@ -113,7 +151,7 @@ export const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children }
 
   if (!isOpen) return null;
 
-  return (
+  const modalContent = (
     <ModalOverlay>
       <Backdrop onClick={onClose} />
       
@@ -125,7 +163,7 @@ export const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children }
             size="icon"
             onClick={onClose}
           >
-            <X style={{ height: '1rem', width: '1rem' }} />
+            <X style={{ height: '1.25rem', width: '1.25rem' }} />
           </CloseButton>
         </ModalHeader>
         
@@ -135,4 +173,7 @@ export const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children }
       </ModalContainer>
     </ModalOverlay>
   );
+
+  // React Portalを使ってbody直下にレンダリング
+  return createPortal(modalContent, document.body);
 }; 

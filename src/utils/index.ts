@@ -8,34 +8,66 @@ export function generateId(): string {
   return Math.random().toString(36).substr(2, 9);
 }
 
-export function formatDate(date: Date): string {
-  return new Intl.DateTimeFormat('ja-JP', {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric',
-  }).format(date);
+// 日付が有効かどうかをチェックする関数
+const isValidDate = (date: any): date is Date => {
+  return date instanceof Date && !isNaN(date.getTime());
+};
+
+export function formatDate(date: Date | null | undefined): string {
+  if (!date || !isValidDate(date)) {
+    return '日付なし';
+  }
+  
+  try {
+    return new Intl.DateTimeFormat('ja-JP', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+    }).format(date);
+  } catch (error) {
+    console.error('日付フォーマットエラー:', error);
+    return '日付なし';
+  }
 }
 
-export function formatDateTime(date: Date): string {
-  return new Intl.DateTimeFormat('ja-JP', {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
-  }).format(date);
+export function formatDateTime(date: Date | null | undefined): string {
+  if (!date || !isValidDate(date)) {
+    return '日付なし';
+  }
+  
+  try {
+    return new Intl.DateTimeFormat('ja-JP', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+    }).format(date);
+  } catch (error) {
+    console.error('日時フォーマットエラー:', error);
+    return '日付なし';
+  }
 }
 
-export function getRelativeTime(date: Date): string {
-  const now = new Date();
-  const diffInSeconds = Math.floor((now.getTime() - date.getTime()) / 1000);
+export function getRelativeTime(date: Date | null | undefined): string {
+  if (!date || !isValidDate(date)) {
+    return '日付なし';
+  }
   
-  if (diffInSeconds < 60) return '今';
-  if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)}分前`;
-  if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)}時間前`;
-  if (diffInSeconds < 2592000) return `${Math.floor(diffInSeconds / 86400)}日前`;
-  
-  return formatDate(date);
+  try {
+    const now = new Date();
+    const diffInSeconds = Math.floor((now.getTime() - date.getTime()) / 1000);
+    
+    if (diffInSeconds < 60) return '今';
+    if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)}分前`;
+    if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)}時間前`;
+    if (diffInSeconds < 2592000) return `${Math.floor(diffInSeconds / 86400)}日前`;
+    
+    return formatDate(date);
+  } catch (error) {
+    console.error('相対時間計算エラー:', error);
+    return '日付なし';
+  }
 }
 
 export const COLORS = [

@@ -1,37 +1,61 @@
 import React from 'react';
-import { cn } from '../../utils';
+import styled from 'styled-components';
 
-interface TextareaProps extends React.TextareaHTMLAttributes<HTMLTextAreaElement> {
-  label?: string;
-  error?: string;
+interface TextareaProps {
+  value?: string;
+  onChange?: (e: React.ChangeEvent<HTMLTextAreaElement>) => void;
+  placeholder?: string;
+  rows?: number;
+  id?: string;
+  className?: string;
+  disabled?: boolean;
+  required?: boolean;
 }
 
-const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
-  ({ className, label, error, ...props }, ref) => {
+const StyledTextarea = styled.textarea`
+  display: flex;
+  min-height: 5rem;
+  width: 100%;
+  border-radius: 0.5rem;
+  border: 1px solid hsl(var(--input));
+  background: hsl(var(--background));
+  padding: 0.75rem;
+  font-size: 0.875rem;
+  color: hsl(var(--foreground));
+  line-height: 1.5;
+  transition: all 0.2s ease;
+  resize: vertical;
+  
+  &::placeholder {
+    color: hsl(var(--muted-foreground));
+  }
+  
+  &:focus {
+    outline: none;
+    border-color: hsl(var(--ring));
+    box-shadow: 0 0 0 2px hsl(var(--ring) / 0.2);
+  }
+  
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+  
+  &:invalid {
+    border-color: hsl(var(--destructive));
+  }
+`;
+
+export const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
+  ({ className, ...props }, ref) => {
     return (
-      <div className="space-y-2">
-        {label && (
-          <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
-            {label}
-          </label>
-        )}
-        <textarea
-          className={cn(
-            "flex min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50",
-            error && "border-destructive focus-visible:ring-destructive",
-            className
-          )}
-          ref={ref}
-          {...props}
-        />
-        {error && (
-          <p className="text-sm text-destructive">{error}</p>
-        )}
-      </div>
+      <StyledTextarea
+        ref={ref}
+        className={className}
+        {...props}
+      />
     );
   }
 );
 
-Textarea.displayName = 'Textarea';
-
-export { Textarea }; 
+Textarea.displayName = 'Textarea'; 
